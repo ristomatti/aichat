@@ -35,6 +35,9 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 const DEFAULT_MODEL_NAME: &str = "default";
 const PLAYGROUND_HTML: &[u8] = include_bytes!("../assets/playground.html");
 const ARENA_HTML: &[u8] = include_bytes!("../assets/arena.html");
+const MANIFEST_JSON: &[u8] = include_bytes!("../assets/manifest.json");
+const ICON_512_PNG: &[u8] = include_bytes!("../assets/icon-512.png");
+const ICON_192_PNG: &[u8] = include_bytes!("../assets/icon-192.png");
 
 type AppResponse = Response<BoxBody<Bytes, Infallible>>;
 
@@ -169,10 +172,16 @@ impl Server {
             self.list_rags()
         } else if path == "/v1/rags/search" {
             self.search_rag(req).await
-        } else if path == "/playground" || path == "/playground.html" {
+        } else if path == "/playground" || path == "/playground.html" || path == "/" {
             self.playground_page()
         } else if path == "/arena" || path == "/arena.html" {
             self.arena_page()
+        } else if path == "/manifest.json" {
+            self.manifest()
+        } else if path == "/icon-512.png" {
+            self.icon_512()
+        } else if path == "/icon-192.png" {
+            self.icon_192()
         } else {
             status = StatusCode::NOT_FOUND;
             Err(anyhow!("Not Found"))
@@ -230,6 +239,27 @@ impl Server {
         let res = Response::builder()
             .header("Content-Type", "application/json; charset=utf-8")
             .body(Full::new(Bytes::from(data.to_string())).boxed())?;
+        Ok(res)
+    }
+
+    fn manifest(&self) -> Result<AppResponse> {
+        let res = Response::builder()
+            .header("Content-Type", "application/json; charset=utf-8")
+            .body(Full::new(Bytes::from(MANIFEST_JSON)).boxed())?;
+        Ok(res)
+    }
+
+    fn icon_512(&self) -> Result<AppResponse> {
+        let res = Response::builder()
+            .header("Content-Type", "image/png")
+            .body(Full::new(Bytes::from(ICON_512_PNG)).boxed())?;
+        Ok(res)
+    }
+
+    fn icon_192(&self) -> Result<AppResponse> {
+        let res = Response::builder()
+            .header("Content-Type", "image/png")
+            .body(Full::new(Bytes::from(ICON_192_PNG)).boxed())?;
         Ok(res)
     }
 
